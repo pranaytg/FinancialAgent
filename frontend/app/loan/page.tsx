@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { motion } from 'framer-motion';
-import Navigation from "../../components/Navigation";
 
 interface LoanResult {
   result: string;
@@ -74,8 +73,6 @@ export default function LoanPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
-      <Navigation />
-      
       <div className="container mx-auto px-6 py-24">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

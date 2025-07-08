@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line } from 'recharts';
 import { motion } from 'framer-motion';
-import Navigation from "../../components/Navigation";
+import { Sparklines, SparklinesLine } from 'react-sparklines';
 
 interface Stock {
   symbol: string;
@@ -13,6 +13,19 @@ interface Stock {
 
 interface PortfolioResult {
   summary: any;
+}
+
+interface PortfolioStock {
+  Symbol: string;
+  Qty: number;
+  "Buy ₹": number;
+  "Current ₹": number;
+  "Invested ₹": number;
+  "Now ₹": number;
+  "Profit/Loss ₹": number;
+  "Return %": number;
+  History: number[];
+  HistoryDates: string[];
 }
 
 export default function PortfolioTracker() {
@@ -133,8 +146,6 @@ export default function PortfolioTracker() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
-      <Navigation />
-      
       <div className="container mx-auto px-6 py-24">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -272,20 +283,30 @@ export default function PortfolioTracker() {
                   <div className="space-y-4">
                     {Array.isArray(result.summary) ? (
                       <div className="space-y-3">
-                        {result.summary.map((stock: any, index: number) => (
+                        {result.summary.map((stock: PortfolioStock, index: number) => (
                           <div key={index} className="bg-gradient-to-br from-violet-50 to-purple-50 p-4 rounded-xl border border-violet-200/50">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               {Object.entries(stock).map(([key, value]) => (
-                                <div key={key}>
-                                  <span className="font-medium text-gray-600 capitalize">
-                                    {key.replace('_', ' ')}:
-                                  </span>
-                                  <span className="ml-2 text-gray-800">
-                                    {typeof value === 'number' ? value.toLocaleString() : String(value)}
-                                  </span>
-                                </div>
+                                key !== 'History' && key !== 'HistoryDates' && (
+                                  <div key={key}>
+                                    <span className="font-medium text-gray-600 capitalize">
+                                      {key.replace('_', ' ')}:
+                                    </span>
+                                    <span className="ml-2 text-gray-800">
+                                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
+                                    </span>
+                                  </div>
+                                )
                               ))}
                             </div>
+                            {stock.History && stock.History.length > 0 && (
+                              <div className="mt-4">
+                                <div className="text-xs text-gray-500 mb-1">6-Month Price Trend</div>
+                                <Sparklines data={stock.History} height={40} width={120} margin={4}>
+                                  <SparklinesLine color="#7c3aed" style={{ fill: "none" }} />
+                                </Sparklines>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

@@ -1,9 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Sparklines, SparklinesLine } from 'react-sparklines';
+import { FaArrowUp, FaArrowDown, FaMinus, FaCheck, FaTimes, FaPause } from 'react-icons/fa';
 
+type RiskSummary = string | any[] | object;
 interface RiskResult {
-  risk_summary: string;
+  risk_summary: RiskSummary;
 }
 
 export default function RiskAnalysis() {
@@ -188,16 +192,99 @@ export default function RiskAnalysis() {
               {result && (
                 <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-8 animate-fade-in">
                   <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6">Risk Analysis Report</h2>
-                  
-                  <div className="prose prose-slate dark:prose-invert max-w-none">
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-800">
-                      <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-3">
-                        AI Risk Summary
-                      </h3>
-                      <div className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                        {result.risk_summary}
+                  <div className="space-y-6">
+                    {Array.isArray(result.risk_summary) ? (
+                      <div className="grid grid-cols-1 gap-6">
+                        {result.risk_summary.map((stock: any) => (
+                          <div key={stock.symbol || stock.company_name} className="bg-white dark:bg-slate-900/80 rounded-2xl shadow-xl border border-purple-200 dark:border-purple-800 p-6 flex flex-col">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <div className="text-xl font-bold text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                                  {stock.company_name || 'Unknown Company'}
+                                  <span className="text-xs text-slate-500 font-normal">({stock.symbol || '-'})</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {stock.action === 'buy' && <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1"><FaCheck /> Buy</span>}
+                                {stock.action === 'sell' && <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full flex items-center gap-1"><FaTimes /> Sell</span>}
+                                {stock.action === 'hold' && <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full flex items-center gap-1"><FaPause /> Hold</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 mb-2">
+                              <div className="flex items-center gap-1">
+                                <span className="font-semibold">Prediction:</span>
+                                {stock.prediction === 'up' && <span className="text-green-600 flex items-center gap-1"><FaArrowUp /> Up</span>}
+                                {stock.prediction === 'down' && <span className="text-red-600 flex items-center gap-1"><FaArrowDown /> Down</span>}
+                                {stock.prediction === 'neutral' && <span className="text-yellow-600 flex items-center gap-1"><FaMinus /> Neutral</span>}
+                              </div>
+                              {typeof stock.probability === 'number' && (
+                                <span className="ml-2 text-xs text-slate-500">Confidence: {stock.probability}%</span>
+                              )}
+                            </div>
+                            {stock.price_trend && Array.isArray(stock.price_trend) && stock.price_trend.length > 0 && (
+                              <div className="mb-3">
+                                <span className="font-semibold text-xs text-slate-500">6-Month Price Trend</span>
+                                <Sparklines data={stock.price_trend} height={40} width={120} margin={4}>
+                                  <SparklinesLine color="#7c3aed" style={{ fill: "none" }} />
+                                </Sparklines>
+                              </div>
+                            )}
+                            {stock.news && Array.isArray(stock.news) && stock.news.length > 0 && (
+                              <div className="mb-2">
+                                <span className="font-semibold">Latest News:</span>
+                                <ul className="list-disc pl-6 space-y-1 text-slate-700 dark:text-slate-300 text-sm">
+                                  {stock.news.map((headline: string, i: number) => (
+                                    <li key={i}>{headline}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {stock.risks && Array.isArray(stock.risks) && stock.risks.length > 0 && (
+                              <div className="mb-2">
+                                <span className="font-semibold">Risks:</span>
+                                <ul className="list-disc pl-6 space-y-1 text-slate-700 dark:text-slate-300 text-sm">
+                                  {stock.risks.map((risk: string, i: number) => (
+                                    <li key={i}>{risk}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {stock.summary && (
+                              <div className="mt-2 text-slate-700 dark:text-slate-300 prose prose-sm dark:prose-invert max-w-none">
+                                <strong>Summary:</strong> {stock.summary}
+                              </div>
+                            )}
+                            {stock.gpt_suggestion && (
+                              <div className="mt-2 text-purple-800 dark:text-purple-200 font-semibold">
+                                <strong>GPT Suggestion:</strong> {stock.gpt_suggestion}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    </div>
+                    ) : typeof result.risk_summary === 'string' ? (
+                      <div className="prose prose-slate dark:prose-invert max-w-none">
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-3">
+                            AI Risk Summary
+                          </h3>
+                          <div className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                            {result.risk_summary}
+                          </div>
+                        </div>
+                      </div>
+                    ) : result.risk_summary && typeof result.risk_summary === 'object' ? (
+                      <div className="prose prose-slate dark:prose-invert max-w-none">
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-3">
+                            AI Risk Summary (JSON)
+                          </h3>
+                          <pre className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                            {JSON.stringify(result.risk_summary, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               )}

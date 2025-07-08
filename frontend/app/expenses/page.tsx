@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from "react";
-import Navigation from "../../components/Navigation";
 
 interface ExpenseResult {
   result: string;
@@ -89,8 +88,6 @@ export default function ExpenseCategorizer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-red-50">
-      <Navigation />
-      
       <div className="container mx-auto px-6 py-24">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

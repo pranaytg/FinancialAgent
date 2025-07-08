@@ -6,7 +6,7 @@ from langchain.tools import tool
 def stock_summary_and_chart(symbol="AAPL"):
     """
     Fetch real-time stock data, basic metrics, and show 6-month chart.
-    Returns: summary text, Plotly chart
+    Returns: dict with structured fields, Plotly chart
     """
     try:
         stock = yf.Ticker(symbol)
@@ -17,14 +17,20 @@ def stock_summary_and_chart(symbol="AAPL"):
         diff = current_price - previous_close
         pct = (diff / previous_close) * 100 if previous_close else 0
 
-        summary = f"""📈 **{info.get('longName', symbol)} ({symbol.upper()})**
+        result = {
+            "symbol": symbol.upper(),
+            "name": info.get("longName", symbol),
+            "price": current_price,
+            "change": diff,
+            "changePercent": f"{pct:.2f}%",
+            "marketCap": info.get("marketCap", 0),
+            "peRatio": info.get("trailingPE", "N/A"),
+            "sector": info.get("sector", "N/A"),
+            "description": info.get("longBusinessSummary", "")
+        }
 
-- 💰 Current Price: ₹{current_price:.2f}
-- 🔻 Change: ₹{diff:.2f} ({pct:.2f}%)
-- 🏷️ Market Cap: ₹{info.get("marketCap", 0):,}
-- 📊 PE Ratio: {info.get("trailingPE", "N/A")}
-- 🧾 Sector: {info.get("sector", "N/A")}
-"""
+        # For legacy fallback
+        result["summary"] = f"""\n📈 **{result['name']} ({result['symbol']})**\n\n- 💰 Current Price: ₹{current_price:.2f}\n- 🔻 Change: ₹{diff:.2f} ({pct:.2f}%)\n- 🏷️ Market Cap: ₹{info.get('marketCap', 0):,}\n- 📊 PE Ratio: {info.get('trailingPE', 'N/A')}\n- 🧾 Sector: {info.get('sector', 'N/A')}\n"""
 
         # Get historical data
         hist = stock.history(period="6mo")
@@ -32,13 +38,13 @@ def stock_summary_and_chart(symbol="AAPL"):
         fig.add_trace(go.Scatter(x=hist.index, y=hist["Close"], mode="lines", name="Close Price"))
         fig.update_layout(title=f"{symbol.upper()} - 6 Month Performance", xaxis_title="Date", yaxis_title="Price (₹)")
 
-        return summary, fig
+        return result, fig
 
     except Exception as e:
-        return f"❌ Failed to fetch stock data: {e}", None
+        return {"summary": f"❌ Failed to fetch stock data: {e}"}, None
 
 @tool
-def run_stock_tool(symbol: str = "AAPL") -> str:
+def run_stock_tool(symbol: str = "AAPL") -> dict:
     """Fetch real-time stock data, basic metrics, and 6-month performance for a given symbol (default: AAPL)."""
-    summary, _ = stock_summary_and_chart(symbol)
-    return summary
+    result, _ = stock_summary_and_chart(symbol)
+    return result

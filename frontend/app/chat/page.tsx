@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   id: string;
@@ -29,12 +30,24 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
+      // Prepare chat history as [user, ai] pairs
+      const history: [string, string][] = [];
+      let lastUser: string | null = null;
+      messages.forEach((msg) => {
+        if (msg.isUser) {
+          lastUser = msg.content;
+        } else if (lastUser !== null) {
+          history.push([lastUser, msg.content]);
+          lastUser = null;
+        }
+      });
+
       const response = await fetch('http://localhost:8000/api/chat/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: input }),
+        body: JSON.stringify({ query: input, history }),
       });
 
       const data = await response.json();
@@ -105,7 +118,13 @@ export default function ChatPage() {
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
                       }`}
                     >
-                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      {message.isUser ? (
+                        <p className="text-sm leading-relaxed">{message.content}</p>
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
+                      )}
                       <p className={`text-xs mt-2 opacity-70 ${message.isUser ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
                         {message.timestamp.toLocaleTimeString()}
                       </p>

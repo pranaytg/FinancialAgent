@@ -55,4 +55,14 @@ def sip_projection(amount: float, years: int, rate: float):
 📊 Estimated Gain: ₹{int(gain):,}
 """
 
-    return summary, fig
+    result = {
+        "monthly_investment": amount,
+        "years": years,
+        "rate": rate,
+        "total_invested": invested,
+        "projected_value": future_value,
+        "estimated_gain": gain,
+        "summary": summary
+    }
+
+    return result, fig

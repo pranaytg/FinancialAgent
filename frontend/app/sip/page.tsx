@@ -3,10 +3,15 @@
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
-import Navigation from '../../components/Navigation';
 
 interface SIPResult {
   summary: string;
+  monthly_investment?: number;
+  years?: number;
+  rate?: number;
+  total_invested?: number;
+  projected_value?: number;
+  estimated_gain?: number;
 }
 
 export default function SIPPage() {
@@ -68,7 +73,6 @@ export default function SIPPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
-      <Navigation />
       <div className="container mx-auto px-6 py-24">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -178,15 +182,15 @@ export default function SIPPage() {
                 className="grid grid-cols-3 gap-4"
               >
                 <div className="bg-white/50 backdrop-blur-lg rounded-xl p-4 border border-green-200/50 text-center">
-                  <div className="text-2xl font-bold text-green-600">₹{totalInvested.toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-green-600">₹{totalInvested.toLocaleString('en-IN')}</div>
                   <div className="text-sm text-gray-600">Total Investment</div>
                 </div>
                 <div className="bg-white/50 backdrop-blur-lg rounded-xl p-4 border border-green-200/50 text-center">
-                  <div className="text-2xl font-bold text-teal-600">₹{Math.round(returns).toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-teal-600">₹{Math.round(returns).toLocaleString('en-IN')}</div>
                   <div className="text-sm text-gray-600">Returns</div>
                 </div>
                 <div className="bg-white/50 backdrop-blur-lg rounded-xl p-4 border border-green-200/50 text-center">
-                  <div className="text-2xl font-bold text-blue-600">₹{Math.round(futureValue).toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-blue-600">₹{Math.round(futureValue).toLocaleString('en-IN')}</div>
                   <div className="text-sm text-gray-600">Final Value</div>
                 </div>
               </motion.div>
@@ -301,7 +305,7 @@ export default function SIPPage() {
                         ></div>
                         <div>
                           <div className="text-sm font-medium text-gray-800">{entry.name}</div>
-                          <div className="text-sm text-gray-600">₹{entry.value.toLocaleString()}</div>
+                          <div className="text-sm text-gray-600">₹{entry.value.toLocaleString('en-IN')}</div>
                         </div>
                       </div>
                     ))}
@@ -320,9 +324,15 @@ export default function SIPPage() {
                     AI Analysis
                   </h3>
                   <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl border border-green-200/50">
-                    <pre className="whitespace-pre-wrap text-sm text-gray-800 font-medium leading-relaxed">
-                      {result.summary}
-                    </pre>
+                    <div className="space-y-2 text-gray-800 text-sm font-medium leading-relaxed">
+                      <div><span className="font-semibold">📈 SIP Projection</span></div>
+                      <div>- Monthly Investment: ₹{result.monthly_investment?.toLocaleString('en-IN')}</div>
+                      <div>- Years: {result.years}</div>
+                      <div>- Annual Return: {result.rate}%</div>
+                      <div className="mt-2">💰 <span className="font-semibold">Total Invested:</span> ₹{result.total_invested?.toLocaleString('en-IN')}</div>
+                      <div>📈 <span className="font-semibold">Projected Value:</span> ₹{result.projected_value?.toLocaleString('en-IN')}</div>
+                      <div>📊 <span className="font-semibold">Estimated Gain:</span> ₹{result.estimated_gain?.toLocaleString('en-IN')}</div>
+                    </div>
                   </div>
                 </motion.div>
               )}

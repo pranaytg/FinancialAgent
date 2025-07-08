@@ -21,7 +21,7 @@ export default function ParticleSystem() {
     let particleId = 0;
 
     const createParticle = (): Particle => ({
-      id: particleId++,
+      id: Date.now() + Math.floor(Math.random() * 1000000),
       x: Math.random() * window.innerWidth,
       y: window.innerHeight + 10,
       size: Math.random() * 4 + 1,

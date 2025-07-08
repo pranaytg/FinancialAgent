@@ -24,13 +24,24 @@ def budget_projection(income: float, rent: float, food: float, transport: float,
     savings = income - total_expenses
     savings_percent = (savings / income) * 100 if income > 0 else 0
 
+    advice = "✅ Great! You're saving well." if savings_percent >= 20 else "⚠️ Try to reduce expenses or increase income."
+
     summary = f"""📊 **Budget Summary**
 - Income: ₹{int(income):,}
 - Total Expenses: ₹{int(total_expenses):,}
 - Savings: ₹{int(savings):,} ({savings_percent:.1f}%)
 
-💡 {"✅ Great! You're saving well." if savings_percent >= 20 else "⚠️ Try to reduce expenses or increase income."}
+💡 {advice}
 """
+
+    result = {
+        "income": income,
+        "total_expenses": total_expenses,
+        "savings": savings,
+        "savings_percent": savings_percent,
+        "advice": advice,
+        "summary": summary
+    }
 
     fig = go.Figure(
         data=[
@@ -47,4 +58,4 @@ def budget_projection(income: float, rent: float, food: float, transport: float,
         annotations=[{"text": "₹ Budget", "font": {"size": 20}, "showarrow": False}]
     )
 
-    return summary, fig
+    return result, fig

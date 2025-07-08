@@ -5,6 +5,7 @@ import { useState } from 'react';
 interface EmailResult {
   success: boolean;
   message: string;
+  file_path?: string;
 }
 
 export default function FinancialReports() {
@@ -52,28 +53,12 @@ export default function FinancialReports() {
     setResult(null);
     
     try {
-      // Create form data as expected by the backend
-      const reportContent = `Financial Report Summary:
-- Portfolio Value: ₹${formData.portfolio_value}
-- Monthly Income: ₹${formData.monthly_income}
-- Monthly Expenses: ₹${formData.monthly_expenses}
-- Financial Goals: ${formData.financial_goals}
-- Risk Tolerance: ${formData.risk_tolerance}
-- Report Type: ${formData.report_type}`;
-
-      // Create a simple text file for the report
-      const reportBlob = new Blob([reportContent], { type: 'text/plain' });
-      const reportFile = new File([reportBlob], 'financial_report.txt', { type: 'text/plain' });
-
-      const formDataObj = new FormData();
-      formDataObj.append('to_email', formData.email);
-      formDataObj.append('subject', `Your ${formData.report_type} Financial Report`);
-      formDataObj.append('body', `Please find your ${formData.report_type} financial report attached.`);
-      formDataObj.append('file', reportFile);
-
-      const response = await fetch('http://localhost:8000/api/send-email/', {
+      const response = await fetch('http://localhost:8000/api/generate-report/', {
         method: 'POST',
-        body: formDataObj,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -81,7 +66,7 @@ export default function FinancialReports() {
       }
 
       const data = await response.json();
-      setResult({ success: true, message: data.result });
+      setResult({ success: data.success, message: data.message, file_path: data.file_path });
     } catch (err) {
       setError('Failed to generate report. Please try again.');
       console.error('Report generation error:', err);
@@ -327,9 +312,19 @@ export default function FinancialReports() {
                     <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
                       Report Sent Successfully!
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 mb-6">
+                    <p className="text-slate-600 dark:text-slate-400 mb-4">
                       {result.message}
                     </p>
+                    {result.file_path && (
+                      <a
+                        href={`http://localhost:8000/${result.file_path}`.replace(/\\/g, '/')}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mt-2 text-sm font-medium text-purple-700 dark:text-purple-300 underline hover:text-purple-900 dark:hover:text-purple-100"
+                      >
+                        Download Report PDF
+                      </a>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center">

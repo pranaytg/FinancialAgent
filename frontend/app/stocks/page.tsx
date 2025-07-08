@@ -1,10 +1,18 @@
 'use client';
 
 import { useState } from "react";
-import Navigation from "../../components/Navigation";
 
 interface StockResult {
-  summary: string;
+  summary?: string;
+  symbol?: string;
+  name?: string;
+  price?: number;
+  change?: number | string;
+  changePercent?: string;
+  marketCap?: number | string;
+  peRatio?: number | string;
+  sector?: string;
+  description?: string;
 }
 
 export default function StockAnalysis() {
@@ -63,7 +71,6 @@ export default function StockAnalysis() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Navigation />
       
       <div className="container mx-auto px-6 py-24">
         <div className="max-w-4xl mx-auto">
@@ -95,7 +102,7 @@ export default function StockAnalysis() {
                       type="text"
                       value={symbol}
                       onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                      className="w-full px-4 py-3 rounded-xl border border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white/50 backdrop-blur-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white/50 backdrop-blur-sm text-black placeholder:text-gray-300"
                       placeholder="RELIANCE.NS"
                     />
                     <p className="text-xs text-gray-500">
@@ -158,14 +165,28 @@ export default function StockAnalysis() {
                     </div>
                     <h3 className="text-xl font-semibold text-gray-800">Stock Analysis Report</h3>
                   </div>
-                  
-                  <div className="prose prose-sm max-w-none">
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200/50">
-                      <pre className="whitespace-pre-wrap text-sm text-gray-800 font-medium leading-relaxed">
-                        {result.summary}
-                      </pre>
+                  {/* Structured Stock Report */}
+                  {typeof result === 'object' && result !== null && (result.symbol || result.price) ? (
+                    <div className="space-y-2 text-gray-800 text-base">
+                      <div className="font-bold text-lg">{result.symbol} {result.name && <span className="text-gray-500 font-normal">({result.name})</span>}</div>
+                      <div className="flex flex-wrap gap-4 mt-2">
+                        <div><span className="font-medium">💰 Current Price:</span> ₹{result.price ?? 'N/A'}</div>
+                        <div><span className="font-medium">🔻 Change:</span> {result.change ?? 'N/A'} ({result.changePercent ?? 'N/A'})</div>
+                        <div><span className="font-medium">🏢 Market Cap:</span> ₹{result.marketCap ?? 'N/A'}</div>
+                        <div><span className="font-medium">📊 PE Ratio:</span> {result.peRatio ?? 'N/A'}</div>
+                        <div><span className="font-medium">🏷️ Sector:</span> {result.sector ?? 'N/A'}</div>
+                      </div>
+                      {result.description && <div className="mt-4 text-gray-600">{result.description}</div>}
                     </div>
-                  </div>
+                  ) : (
+                    <div className="prose prose-sm max-w-none">
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200/50">
+                        <pre className="whitespace-pre-wrap text-sm text-gray-800 font-medium leading-relaxed">
+                          {result.summary}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -134,6 +134,19 @@ def tax_summary_gpt(
         nps_employer, deductions_80e, deductions_80g
     )
     best = "New Regime" if new_tax < old_tax else "Old Regime"
+    result = {
+        "old_regime": {
+            "taxable_income": old_taxable,
+            "tax_payable": old_tax
+        },
+        "new_regime": {
+            "taxable_income": new_taxable,
+            "tax_payable": new_tax
+        },
+        "best": best,
+        "suggestions": suggestions,
+        "gpt_suggestions": None,
+    }
     summary = f"""
 ### Tax Optimization Summary
 
@@ -157,7 +170,23 @@ def tax_summary_gpt(
             salary, rent, deductions_80c, deductions_80d, hra_received, basic_salary,
             nps_employer, deductions_80e, deductions_80g
         )
+        # Try to parse GPT suggestions into a list of tips (split by lines or dashes)
+        gpt_sugg_list = []
+        if isinstance(gpt_sugg, str):
+            # Split by lines that start with a dash or bullet, or by newlines
+            for line in gpt_sugg.splitlines():
+                line = line.strip()
+                if line.startswith('-') or line.startswith('•'):
+                    tip = line.lstrip('-•').strip()
+                    if tip:
+                        gpt_sugg_list.append(tip)
+                elif line:
+                    gpt_sugg_list.append(line)
+        result["gpt_suggestions_raw"] = gpt_sugg
+        result["gpt_suggestions_list"] = gpt_sugg_list
+        result["gpt_suggestions"] = gpt_sugg  # for backward compatibility
         summary += f"\n---\n**GPT Suggestions:**\n{gpt_sugg}"
     except Exception as e:
         summary += f"\n\n*GPT suggestions unavailable: {e}*"
-    return summary
+    result["summary"] = summary
+    return result

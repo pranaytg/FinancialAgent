@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
-import Navigation from "../../components/Navigation";
 
 interface BudgetResult {
   summary: string;
@@ -96,8 +95,6 @@ export default function BudgetAnalyzer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
-      <Navigation />
-      
       <div className="container mx-auto px-6 py-24">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

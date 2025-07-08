@@ -1,9 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface TaxResult {
-  summary: string;
+  summary?: string;
+  old_regime?: {
+    taxable_income: number;
+    tax_payable: number;
+  };
+  new_regime?: {
+    taxable_income: number;
+    tax_payable: number;
+  };
+  best?: string;
+  suggestions?: string[];
+  gpt_suggestions?: string;
+  gpt_suggestions_list?: string[];
+  gpt_suggestions_raw?: string;
 }
 
 export default function TaxOptimizer() {
@@ -249,9 +263,54 @@ export default function TaxOptimizer() {
                     <span className="mr-2">🧠</span>
                     Tax Analysis Summary
                   </h3>
-                  <div className="text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
-                    {result.summary}
-                  </div>
+                  {result.old_regime && result.new_regime ? (
+                    <div className="space-y-2 text-slate-700 dark:text-slate-300">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <div className="flex-1 bg-white/70 dark:bg-slate-900/40 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
+                          <div className="font-semibold text-indigo-700 dark:text-indigo-300 mb-1">Old Regime</div>
+                          <div>Taxable Income: <span className="font-mono">₹{result.old_regime.taxable_income.toLocaleString()}</span></div>
+                          <div>Tax Payable: <span className="font-mono">₹{result.old_regime.tax_payable.toLocaleString()}</span></div>
+                        </div>
+                        <div className="flex-1 bg-white/70 dark:bg-slate-900/40 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
+                          <div className="font-semibold text-indigo-700 dark:text-indigo-300 mb-1">New Regime</div>
+                          <div>Taxable Income: <span className="font-mono">₹{result.new_regime.taxable_income.toLocaleString()}</span></div>
+                          <div>Tax Payable: <span className="font-mono">₹{result.new_regime.tax_payable.toLocaleString()}</span></div>
+                        </div>
+                      </div>
+                      <div className="mt-4 text-lg font-bold text-green-700 dark:text-green-300">
+                        Best for you: <span className="underline underline-offset-2">{result.best}</span>
+                      </div>
+                      <div className="mt-4">
+                        <div className="font-semibold text-indigo-700 dark:text-indigo-300 mb-1">Suggestions</div>
+                        <ul className="list-disc pl-6 space-y-1">
+                          {result.suggestions?.map((s, i) => (
+                            <li key={i}>{s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      {result.gpt_suggestions_list && result.gpt_suggestions_list.length > 0 ? (
+                        <div className="mt-4">
+                          <div className="font-semibold text-indigo-700 dark:text-indigo-300 mb-1">GPT Suggestions</div>
+                          <ul className="list-disc pl-6 space-y-1 bg-indigo-100 dark:bg-indigo-900/30 rounded p-3 text-slate-800 dark:text-slate-200">
+                            {result.gpt_suggestions_list.map((tip, i) => (
+                              <li key={i}><ReactMarkdown>{tip}</ReactMarkdown></li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : result.gpt_suggestions_raw ? (
+                        <div className="mt-4">
+                          <div className="font-semibold text-indigo-700 dark:text-indigo-300 mb-1">GPT Suggestions</div>
+                          <div className="bg-indigo-100 dark:bg-indigo-900/30 rounded p-3 text-slate-800 dark:text-slate-200 prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{result.gpt_suggestions_raw}</ReactMarkdown>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                      {result.summary}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -289,7 +348,7 @@ export default function TaxOptimizer() {
               
               <div className="text-center">
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl mx-auto mb-4 flex items-center justify-center text-xl">
-                  �
+                  💡
                 </div>
                 <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-2">Section 80D</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
